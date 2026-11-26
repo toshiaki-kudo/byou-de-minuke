@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>秒で見抜け！ダークパターン</title>
+<meta name="description" content="命令は数秒。誘導に乗ったらドカン。身近なダークパターンを秒速で見抜くゲーム。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1b22; --muted:#6b6878; --line:#e6e3ee; --bg:#f6f4fa; --card:#fff;
+  --brand:#7b2cf5; --brand2:#ff3d8b; --night:#0f0e13; --gold:#ffcf4a;
+  /* pop chrome */
+  --k:#111; --y:#ffd60a; --p:#ff2e93; --c:#1ec8ff; --o:#ff7a00; --g:#2ed15a;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:800;color:var(--k);min-height:100vh;background:var(--y);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;color:inherit}
+a{cursor:pointer}
+p{margin:0}
+.hidden{display:none!important}
+.dela{font-family:"Dela Gothic One","M PLUS Rounded 1c",sans-serif;font-weight:400}
+/* 読みやすい縁取り（線を文字の外側だけに描く） */
+.stroke{word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance;color:#fff;-webkit-text-stroke:7px var(--k);paint-order:stroke fill;text-shadow:5px 5px 0 var(--k);letter-spacing:.05em}
+/* 黒縁の白抜き文字 */
+.outline{color:#fff;-webkit-text-stroke:8px var(--k);paint-order:stroke fill;text-shadow:6px 6px 0 var(--k);letter-spacing:.04em}
+.dotsbg{background-image:radial-gradient(rgba(0,0,0,.13) 2.2px,transparent 2.7px);background-size:18px 18px}
+.burst{background:repeating-conic-gradient(from 0deg at 50% 50%, var(--b1) 0 10deg, var(--b2) 10deg 20deg)}
+
+.screen{display:none;min-height:100vh}
+.screen.on{display:block}
+
+/* ---------- pop buttons ---------- */
+.pbtn{display:inline-block;border:4px solid var(--k);border-radius:999px;padding:14px 34px;font-weight:800;font-size:20px;letter-spacing:.04em;background:var(--p);color:#fff;box-shadow:6px 6px 0 var(--k);text-decoration:none;transition:transform .08s,box-shadow .08s}
+.pbtn:hover{animation:wobble .5s}
+.pbtn:active{transform:translate(6px,6px);box-shadow:0 0 0 var(--k)}
+.pbtn.cyan{background:var(--c);color:var(--k)}
+.pbtn.white{background:#fff;color:var(--k)}
+@keyframes wobble{25%{transform:rotate(-3deg) scale(1.04)}75%{transform:rotate(3deg) scale(1.04)}}
+
+/* ---------- title ---------- */
+#title{--b1:#ffd60a;--b2:#ffe45c;position:relative;overflow:hidden}
+.t-in{max-width:620px;margin:0 auto;padding:56px 20px 48px;text-align:center;position:relative}
+.t-tag{display:inline-block;background:var(--k);color:var(--y);padding:6px 14px;border-radius:999px;font-size:13px;letter-spacing:.1em;transform:rotate(-3deg)}
+.t-logo{margin:22px 0 6px;line-height:1.05;transform:rotate(-4deg)}
+.t-logo .l1{display:block;font-size:clamp(30px,8vw,52px)}
+.t-logo .l2{display:block;font-size:clamp(38px,11.5vw,78px);color:var(--p);white-space:nowrap}
+.t-logo .l2.outline{color:var(--p)}
+.t-sub{font-size:16px;margin:30px 0 30px;font-weight:500}
+.stickers{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:34px}
+.sticker{background:#fff;border:3px solid var(--k);border-radius:16px;padding:10px 14px;font-size:14px;box-shadow:4px 4px 0 var(--k)}
+.sticker:nth-child(1){transform:rotate(-3deg)}
+.sticker:nth-child(2){transform:rotate(2deg);background:var(--c)}
+.sticker:nth-child(3){transform:rotate(-1deg);background:var(--p);color:#fff}
+.t-note{margin-top:26px;font-size:12px;font-weight:500;opacity:.7}
+
+
+/* タイトルのイメージ：ずるいCookieバナー */
+.demo{position:relative;width:min(100%,360px);margin:26px auto 6px;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif}
+.demo-card{position:relative;background:#fff;border:4px solid var(--k);border-radius:20px;box-shadow:7px 7px 0 var(--k);padding:18px 18px 12px;transform:rotate(-3deg)}
+.demo-q{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.demo-yes{display:block;background:var(--p);color:#fff;border:3px solid var(--k);border-radius:14px;padding:12px;font-family:"M PLUS Rounded 1c",sans-serif;font-weight:800;font-size:26px;letter-spacing:.08em;animation:yesPulse 1.6s ease-in-out infinite}
+@keyframes yesPulse{50%{transform:scale(1.04)}}
+.demo-noRow{display:block;margin-top:12px;line-height:1}
+.demo-no{font-size:14px;color:#6e6e76;text-decoration:underline;font-weight:400}
+.demo-cursor{position:absolute;left:78%;top:118%;width:34px;height:34px;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.25));animation:pull 2.4s cubic-bezier(.5,0,.3,1) infinite}
+@keyframes pull{0%{left:84%;top:118%}55%,80%{left:60%;top:52%}100%{left:84%;top:118%}}
+@media (prefers-reduced-motion:reduce){.demo-yes,.demo-cursor{animation:none}}
+
+/* ---------- game ---------- */
+#game{--b1:#ffd60a;--b2:#ffde3d;padding-bottom:90px}
+.g-top{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 16px 0}
+.lives{display:flex;gap:6px}
+.hrt{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid var(--k);color:var(--p);font-size:18px;line-height:1;box-shadow:3px 3px 0 var(--k)}
+.hrt.lost{color:#ccc;background:#eee}
+.hrt.pop{animation:hpop .6s}
+@keyframes hpop{30%{transform:scale(1.6) rotate(-20deg)}}
+.score{font-size:18px;font-weight:800;letter-spacing:.04em;background:var(--k);color:var(--y);border-radius:999px;padding:6px 16px;transform:rotate(2deg)}
+.cmd{max-width:760px;margin:10px auto 14px;padding:0 16px;text-align:center;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:clamp(28px,7.5vw,44px);line-height:1.25;transform:rotate(-2deg);-webkit-text-stroke-width:5px;text-shadow:3px 3px 0 var(--k);letter-spacing:.08em}
+@media (max-width:520px){.cmd{-webkit-text-stroke-width:4px;text-shadow:3px 3px 0 var(--k)}}
+.cmd.in{animation:cmdIn .45s cubic-bezier(.2,1.8,.4,1)}
+@keyframes cmdIn{from{transform:rotate(-2deg) scale(2.2);opacity:0}}
+.frame-wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.frame{position:relative;background:var(--bg);border:4px solid var(--k);border-radius:20px;overflow:hidden;box-shadow:8px 8px 0 var(--k);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;font-weight:400;color:var(--ink)}
+.bar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#ececf0;border-bottom:3px solid var(--k)}
+.dots{display:flex;gap:5px}.dots i{width:10px;height:10px;border-radius:50%;background:#d0cdd8}
+.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.url{flex:1;min-width:0;background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.url::before{content:"🔒 ";font-size:10px}
+
+/* 導火線タイマー */
+.fuse{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--k);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.fuse-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.bomb{font-size:30px;line-height:1;flex:none}
+.fuse.hurry .bomb{animation:shake .25s infinite}
+@keyframes shake{25%{transform:translateX(-3px) rotate(-8deg)}75%{transform:translateX(3px) rotate(8deg)}}
+.fuse-track{position:relative;flex:1;height:14px;border-radius:999px;background:#333}
+.fuse-fill{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:999px;background:repeating-linear-gradient(-45deg,#ffb000 0 8px,#ff7a00 8px 16px)}
+.fuse-fill::after{content:"✸";position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:#fff36b;font-size:24px;text-shadow:0 0 8px #ff7a00;animation:spark .15s infinite alternate}
+@keyframes spark{to{transform:translateY(-50%) scale(1.35) rotate(30deg)}}
+.fuse.hurry .fuse-fill{background:repeating-linear-gradient(-45deg,#ff2e2e 0 8px,#ff7a00 8px 16px)}
+.fuse.paused .fuse-fill::after{display:none}
+
+/* 幕間・命令・成功・ドカン（全画面オーバーレイ） */
+.over{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px;overflow:hidden}
+.over.on{display:flex}
+.over.inter{--b1:#ff2e93;--b2:#ff5aa9}
+.over.inter.alt{--b1:#1ec8ff;--b2:#5ad8ff}
+.over.speed{--b1:#ff7a00;--b2:#ffa23d}
+.over.cmdflash{--b1:#ffd60a;--b2:#ffe45c}
+.over .num{font-family:"Dela Gothic One",sans-serif;font-size:clamp(110px,30vw,190px);line-height:1;animation:numIn .5s cubic-bezier(.2,1.8,.4,1)}
+@keyframes numIn{from{transform:scale(.2) rotate(-30deg)}}
+.over .lbl{font-size:18px;margin-bottom:6px;background:var(--k);color:#fff;border-radius:999px;padding:4px 14px}
+.over .lives{margin-top:18px}
+.over .lives .hrt{width:46px;height:46px;font-size:24px}
+.over .big{font-family:"Dela Gothic One",sans-serif;font-size:clamp(48px,13vw,96px);line-height:1.05;animation:numIn .5s cubic-bezier(.2,1.8,.4,1);transform:rotate(-6deg)}
+.over .cmd-big{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:clamp(42px,11.5vw,84px);line-height:1.2;animation:cmdPop .5s cubic-bezier(.2,1.8,.4,1);transform:rotate(-4deg)}
+@keyframes cmdPop{from{transform:rotate(-4deg) scale(3);opacity:0}}
+.over .cmd-sub{margin-top:18px;font-size:16px;background:#fff;border:3px solid var(--k);border-radius:999px;padding:6px 16px}
+
+.fx{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;pointer-events:none}
+.fx.on{display:flex}
+.fx.bad{background:rgba(17,17,17,.55)}
+.fx.good{background:rgba(255,255,255,.35)}
+.okstamp{font-family:"Dela Gothic One",sans-serif;font-size:clamp(48px,12vw,80px);color:#fff;background:var(--g);border:5px solid var(--k);border-radius:24px;padding:10px 34px;box-shadow:8px 8px 0 var(--k);transform:rotate(-8deg);animation:stampIn .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes stampIn{from{transform:rotate(-8deg) scale(2.6);opacity:0}}
+.boom{width:min(78vw,360px);aspect-ratio:1;display:grid;place-items:center;background:var(--o);border:0;clip-path:polygon(50% 0%,61% 26%,88% 12%,76% 39%,100% 50%,76% 61%,88% 88%,61% 74%,50% 100%,39% 74%,12% 88%,24% 61%,0% 50%,24% 39%,12% 12%,39% 26%);animation:boomIn .45s cubic-bezier(.2,1.8,.4,1)}
+.boom-in{width:72%;aspect-ratio:1;display:grid;place-items:center;background:#ffe14d;clip-path:inherit}
+.boom-in span{font-family:"Dela Gothic One",sans-serif;font-size:clamp(40px,11vw,62px);color:var(--k);transform:rotate(-8deg)}
+@keyframes boomIn{from{transform:scale(.1) rotate(-40deg)}}
+.boom-msg{margin-top:10px;max-width:440px;background:#fff;border:4px solid var(--k);border-radius:18px;padding:12px 16px;font-size:16px;line-height:1.5;text-align:center;box-shadow:6px 6px 0 var(--k);animation:stampIn .4s .1s both cubic-bezier(.2,1.8,.4,1)}
+.frame.hit{animation:hit .45s}
+@keyframes hit{20%{transform:translate(-10px,4px) rotate(-1deg)}40%{transform:translate(9px,-4px) rotate(1deg)}60%{transform:translate(-6px,2px)}80%{transform:translate(4px,0)}}
+
+/* ---------- result ---------- */
+#result{--b1:#1ec8ff;--b2:#4fd6ff}
+.r-in{max-width:760px;margin:0 auto;padding:44px 16px 60px}
+.r-head{text-align:center}
+.r-title{font-size:clamp(46px,12vw,84px);line-height:1.05;transform:rotate(-4deg)}
+.r-title.over-t{color:var(--p)}
+.r-score{display:inline-flex;gap:14px;align-items:center;margin:26px auto 8px;background:#fff;border:4px solid var(--k);border-radius:22px;padding:12px 22px;box-shadow:6px 6px 0 var(--k);transform:rotate(1deg)}
+.r-score b{font-family:"Dela Gothic One",sans-serif;font-size:46px;color:var(--p);line-height:1}
+.r-rank{font-size:16px;margin-top:12px}
+.r-rank b{background:var(--k);color:var(--y);border-radius:8px;padding:2px 8px}
+.r-h{font-size:24px;font-weight:800;margin:40px 0 18px;text-align:center}
+.card{background:#fff;border:4px solid var(--k);border-radius:20px;box-shadow:6px 6px 0 var(--k);padding:16px 18px;margin-bottom:18px;display:grid;grid-template-columns:1fr;gap:14px}
+.c-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.c-no{font-size:13px;font-weight:800;background:var(--y);border:3px solid var(--k);border-radius:999px;padding:2px 10px}
+.c-res{font-size:12px;border-radius:999px;padding:3px 10px;border:3px solid var(--k)}
+.c-res.ok{background:var(--g);color:#fff}
+.c-res.ng{background:var(--o);color:#fff}
+.c-res.na{background:#eee;color:#777}
+.c-name{font-size:22px;font-weight:800;margin:8px 0 2px;line-height:1.35}
+.c-en{font-size:12px;opacity:.55;margin-bottom:8px}
+.c-d{font-size:14px;font-weight:500;line-height:1.85}
+.c-r{font-size:12px;font-weight:500;opacity:.65;margin-top:8px}
+.spec-view{display:flex;justify-content:center;align-items:center;background:#f3f3f5;border-radius:14px;padding:14px}
+.crop{position:relative;overflow:hidden;border-radius:10px;flex:none;background:#fff;box-shadow:0 0 0 1px #e2e2e6}
+.page.snap{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;font-weight:400;color:var(--ink)}
+.page.snap.isolate *{visibility:hidden}
+.page.snap.isolate .keep,.page.snap.isolate .keep *{visibility:visible}
+.page.snap .pd{grid-template-columns:1fr}
+.page.snap .pd-img{aspect-ratio:16/9}
+.crop .page{position:absolute;top:0;left:0;transform-origin:0 0;pointer-events:none}
+@media (min-width:640px){.card{grid-template-columns:1fr 340px;align-items:start}}
+.r-closing{background:#fff;border:4px solid var(--k);border-radius:20px;padding:18px 20px;font-size:15px;font-weight:500;line-height:1.9;margin:30px 0;box-shadow:6px 6px 0 var(--k)}
+.r-acts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.r-note{text-align:center;font-size:12px;font-weight:500;opacity:.7;margin-top:28px}
+
+/* ---------- service screens (shared with the other edition) ---------- */
+.page{position:relative;min-height:500px;overflow:hidden}
+
+/* toasts */
+.toasts{position:absolute;top:12px;left:0;right:0;z-index:40;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 12px}
+.toast{background:#2a2733;color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:tin .25s ease-out;max-width:100%;line-height:1.5}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}}
+
+/* ---------- service UI (ずっとプラス) ---------- */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#fff;border-bottom:1px solid var(--line)}
+.logo{font-weight:900;font-size:17px;letter-spacing:.02em;background:linear-gradient(90deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav .me{font-size:12px;color:var(--muted)}
+.btn{border:0;border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;transition:filter .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 6px 18px rgba(123,44,245,.3)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.block{display:block;width:100%}
+.btn.big{padding:15px 18px;font-size:15px}
+.btn.danger{background:#fff;color:#c4363b;border:1.5px solid #e6b3b5}
+.btn.ghost-btn{background:transparent;color:#a8a4b5;font-weight:500;font-size:12px;padding:10px;display:block;margin:6px auto 0}
+.pill{display:inline-block;font-size:10px;font-weight:700;background:#ffe7f1;color:var(--brand2);border-radius:999px;padding:2px 8px;vertical-align:middle}
+.muted{color:var(--muted);font-size:13px;line-height:1.7}
+.pg-h{font-size:19px;margin:0 0 6px}
+
+.lp{padding:56px 24px 64px;text-align:center;background:radial-gradient(circle at 30% 0%,#efe4ff,transparent 60%),radial-gradient(circle at 80% 20%,#ffe3ef,transparent 55%)}
+.lp .logo{font-size:30px;display:inline-block;margin-bottom:12px}
+.lp h2{font-size:clamp(20px,4.6vw,28px);margin:0 0 10px;line-height:1.5}
+.lp .sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.lp .btn{padding:16px 40px;font-size:16px;border-radius:999px}
+.lp .fine{font-size:10px;color:#b4b0c0;margin-top:14px}
+
+.home{padding:20px}
+.home h3{font-size:15px;margin:4px 0 12px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{aspect-ratio:16/10;border-radius:10px;display:flex;align-items:flex-end;padding:10px;color:#fff;font-size:12px;font-weight:700}
+
+/* cookie */
+.dim{position:absolute;inset:0;background:rgba(20,16,30,.35);z-index:10}
+.cookie{position:absolute;left:16px;right:16px;bottom:16px;z-index:11;background:#fff;border-radius:14px;padding:20px;box-shadow:0 16px 40px rgba(0,0,0,.25);max-width:460px;margin:0 auto}
+.ck-t{font-weight:800;font-size:15px;margin-bottom:8px}
+.ck-d{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.tiny-link{display:block;margin:10px auto 0;background:none;border:0;color:#bdb9c8;font-size:11px;text-decoration:underline;padding:4px}
+.tg{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
+.tg small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.tg input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:12px;background:#d4d0dd;position:relative;flex:none;cursor:pointer;transition:.2s;margin:0}
+.tg input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tg input:checked{background:var(--brand)}
+.tg input:checked::after{left:21px}
+.tg input:disabled{opacity:.45;cursor:not-allowed}
+.ck-actions{margin-top:16px}
+
+/* account */
+.acct{padding:24px 20px 12px}
+.plan-card{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;background:#fff;border-radius:14px;padding:18px;margin:14px 0 16px;border:1px solid var(--line)}
+.lbl{font-size:11px;color:var(--muted)}
+.plan-name{font-size:18px;font-weight:800;margin:2px 0}
+.rows{list-style:none;margin:0;padding:0;background:#fff;border-radius:14px;border:1px solid var(--line);overflow:hidden}
+.rows li{display:flex;justify-content:space-between;padding:14px 16px;font-size:14px;border-bottom:1px solid var(--line);cursor:pointer}
+.rows li:last-child{border-bottom:0}
+.rows li:hover{background:#faf9fc}
+.rows li span{color:#b4b0c0}
+.foot{margin-top:28px;padding:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px}
+.foot a{color:#8e8a9c}
+.foot a:hover{text-decoration:underline}
+.foot a.ghost{color:#dad6e3;font-size:9.5px}
+.copy{width:100%;color:#b4b0c0;font-size:10px;margin-top:6px}
+
+/* modal */
+.modal-bg{position:absolute;inset:0;background:rgba(20,16,30,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:18px;padding:28px 24px 20px;max-width:380px;width:100%;text-align:center}
+.sad{font-size:48px;margin-bottom:8px}
+.modal h3{font-size:18px;margin:0 0 8px}
+.modal p{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px}
+.shame{background:none;border:0;color:#a8a4b5;font-size:12px;margin-top:12px;padding:6px}
+
+/* forms */
+.form-card{background:#fff;margin:20px;border-radius:16px;padding:24px 20px;border:1px solid var(--line)}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.6;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.chk input{width:18px;height:18px;margin-top:3px;flex:none;accent-color:var(--brand)}
+.form-card > .btn.primary:not(.block){margin-top:20px}
+.arena{position:relative;height:220px;margin:16px 0;border:1.5px dashed var(--line);border-radius:12px}
+.flee{position:absolute;white-space:nowrap;transition:left .22s cubic-bezier(.3,1.4,.6,1),top .22s cubic-bezier(.3,1.4,.6,1)}
+.flee.tired{transform:scale(.88) rotate(-4deg);opacity:.85}
+.urg{position:sticky;top:0;z-index:5;background:#fff2d6;color:#8a5a00;font-size:12.5px;padding:10px 16px;text-align:center;border-bottom:1px solid #f3dfae}
+.urg b{color:#c4363b;font-variant-numeric:tabular-nums}
+.urg.flash{animation:flash .6s}
+@keyframes flash{50%{background:#ffd7d8}}
+.q{display:block;font-size:14px;font-weight:700;margin:18px 0 8px}
+.req{font-size:10px;background:#ffe2e3;color:#c4363b;border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+.q select{display:block;width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid var(--line);font:inherit;font-weight:400;background:#fff}
+.nps{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:8px}
+.nps label{cursor:pointer}
+.nps input{position:absolute;opacity:0;pointer-events:none}
+.nps span{display:block;text-align:center;padding:8px 0;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:400}
+.nps input:checked+span{background:var(--brand);color:#fff;border-color:var(--brand)}
+#half{margin-top:24px}
+.opt{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:14px;margin-top:12px;cursor:pointer}
+.opt input{margin-top:4px;accent-color:var(--brand);flex:none}
+.opt.rec{border:2px solid var(--brand);background:#f7f1ff}
+.opt.plain{border:1px solid var(--line)}
+.opt.plain .opt-t,.opt.plain .opt-d{color:#a8a4b5}
+.opt-t{font-weight:800;font-size:15px;margin-bottom:4px}
+.opt-d{font-size:12.5px;color:var(--muted);line-height:1.6}
+.fine{font-size:9.5px;color:#b9b5c4;margin-top:4px}
+#fx{margin-top:20px}
+
+/* ---------- news / shop screens ---------- */
+.logo.news{background:none;color:#174ea6}
+.logo.shop{background:none;color:#e0612b}
+.search{flex:1;max-width:280px;height:30px;margin:0 16px;border-radius:999px;background:#f1eff5}
+.art{padding:24px 20px 24px;background:#fff}
+.art .cat{font-size:12px;color:#174ea6;font-weight:700}
+.art-h{font-size:20px;line-height:1.5;margin:6px 0}
+.art-meta{font-size:12px;color:var(--muted);margin-bottom:14px}
+.ph{aspect-ratio:16/5;border-radius:8px;background:linear-gradient(135deg,#cfd9e8,#e9eef5);margin-bottom:16px}
+.lines i{display:block;height:10px;border-radius:5px;background:#eceaf1;margin:12px 0}
+.lines i:nth-child(3n){width:70%}
+.cookie.news{max-width:none;left:0;right:0;bottom:0;border-radius:14px 14px 0 0}
+.cookie.news .btn.primary{background:#174ea6;box-shadow:none}
+.shopui .btn.primary{background:#e0612b;box-shadow:0 6px 18px rgba(224,97,43,.28)}
+.shopui .chk input{accent-color:#e0612b}
+.hero{margin:16px 20px 0;border-radius:12px;padding:24px 22px;background:linear-gradient(120deg,#ffe2cf,#ffd0dc);font-weight:800;font-size:18px;color:#7a3218}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 20px 24px}
+.item{background:#fff;border-radius:10px;border:1px solid var(--line);padding:8px;font-size:12px}
+.item .im{aspect-ratio:1;border-radius:6px;margin-bottom:6px;display:grid;place-items:center;font-size:30px;background:#f3f1f7}
+.item b{display:block;margin-top:2px}
+.modal.coupon{position:relative;text-align:left;padding-top:30px}
+.cp-k{font-size:12px;font-weight:700;color:#e0612b}
+.modal.coupon h3{margin-top:4px}
+.modal.coupon p{margin-bottom:14px}
+.inp{display:block;width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;margin-bottom:12px;background:#fff;color:var(--ink)}
+.x{position:absolute;top:8px;right:10px;background:none;border:0;color:#d3d0da;font-size:13px;padding:4px 6px}
+.x.late{opacity:0;pointer-events:none;transition:opacity .6s}
+.x.late.shown{opacity:1;pointer-events:auto}
+@media (max-width:520px){.shopui .modal-bg{align-items:flex-start;padding-top:28px}}
+.modal.coupon .cp-fine{font-size:9.5px;color:#b0adb8;line-height:1.55;margin:10px 0 0}
+.modal.coupon .shame.tiny{font-size:10.5px;color:#bdbac6;margin-top:4px}
+.modal.coupon .shame{display:block;margin:10px auto 0}
+.fld{display:block;font-size:12px;color:var(--muted);margin-top:12px}
+.fld .inp{margin:4px 0 0;background:#faf9fc}
+.sec-h{font-size:13px;font-weight:700;margin:22px 0 2px}
+.ord{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ord .p,.chk .pr{font-weight:700;white-space:nowrap}
+.chk .pr{margin-left:auto}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 14px;font-weight:800;font-size:14px}
+.total b{font-size:22px}
+.mailchk{display:flex;gap:6px;align-items:center;font-size:11px;color:#a8a4b5;margin-top:14px;cursor:pointer}
+.mailchk input{width:12px;height:12px;margin:0;accent-color:#e0612b}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px}
+.pd-img{aspect-ratio:1;border-radius:12px;background:linear-gradient(135deg,#efedf4,#dcd7e8);display:grid;place-items:center;font-size:64px}
+.pd-name{font-size:18px;font-weight:800;line-height:1.4}
+.rate{font-size:12px;color:#e9a400;margin:4px 0 10px}
+.rate span{color:var(--muted)}
+.price{font-size:13px;color:var(--muted)}
+.price b{font-size:24px;color:#d23b3b;margin-left:6px}
+.sale{background:#d23b3b;color:#fff;border-radius:8px;padding:10px 12px;font-size:13px;margin:12px 0 8px;font-weight:700}
+.sale b{font-variant-numeric:tabular-nums;font-size:16px;margin-left:4px}
+.sale.flash{animation:flash2 .7s 3}
+@keyframes flash2{50%{box-shadow:0 0 0 5px var(--gold)}}
+.stock{font-size:12px;color:#d23b3b;font-weight:700;margin-bottom:14px}
+.btn.sub{display:block;width:100%;margin-top:8px;background:#fff;border:1.5px solid #e0612b;color:#e0612b}
+.reload{background:none;border:0;font-size:17px;line-height:1;color:#6b6878;padding:0 2px}
+.reload:hover{color:var(--ink)}
+.page.reloading{opacity:.1;transition:opacity .15s}
+@media (max-width:520px){
+  .items{grid-template-columns:repeat(2,1fr)}
+  .pd{grid-template-columns:1fr}
+  .pd-img{aspect-ratio:16/9}
+  .search{display:none}
+}
+
+
+@media (max-width:520px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .stat{gap:10px;font-size:14px}
+  .hud-in{gap:12px;padding:14px 16px}
+  .nps{grid-template-columns:repeat(6,1fr)}
+  .form-card{margin:14px;padding:20px 16px}
+  .page{min-height:540px}
+}
+
+
+/* =========================================================
+   POP SKIN：中のサイト画面もワリオ風の描き方に
+   （配置・文言・大小関係はそのまま、描き方だけを変える）
+   ========================================================= */
+.frame,.page.snap{font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif!important;font-weight:500!important;color:var(--k)}
+.frame .page{background:#fff8dc}
+.page.snap{background:transparent!important}
+.page :is(h2,h3,.pg-h,.art-h,.pd-name,.plan-name,.ck-t,.opt-t,.sec-h){font-weight:800}
+.page .muted,.page .ck-d,.page .art-meta,.page .opt-d,.page .tg small,.page .modal p,.page .lbl{color:#5a5560}
+
+/* ヘッダー */
+.page .nav{background:#fff;border-bottom:3px solid var(--k)}
+.page .logo{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:18px;-webkit-background-clip:initial;background-clip:initial;background:none;color:#8a3cff}
+.page .logo.news{color:#2f6bff}
+.page .logo.shop{color:#ff6a00}
+.page .nav .me{font-weight:800;color:var(--k)}
+.page .search{background:#fff;border:3px solid var(--k);height:30px}
+
+/* ボタン：黒縁＋ベタ影 */
+.page .btn{border:3px solid var(--k);border-radius:14px;font-weight:800;box-shadow:4px 4px 0 var(--k)}
+.page .btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--k)}
+.page .btn.primary{background:#ff3d8b;color:#fff;filter:none}
+.page .cookie.news .btn.primary{background:#2f6bff}
+.page .shopui .btn.primary{background:#ff6a00}
+.page .btn.sub{background:#fff;color:#ff6a00;border-color:var(--k)}
+.page .btn.big{padding:13px 18px;font-size:16px}
+
+/* カード類 */
+.page :is(.cookie,.modal,.form-card,.plan-card,.rows,.item,.pd-img,.ph,.hero){border:3px solid var(--k);box-shadow:5px 5px 0 var(--k)}
+.page .cookie{border-radius:18px}
+.page .cookie.news{border-radius:18px 18px 0 0;box-shadow:none;border-bottom:0;left:0;right:0}
+.page .modal{border-radius:20px}
+.page .form-card{border-radius:18px}
+.page .modal-bg,.page .dim{background:rgba(17,17,17,.45)}
+.page .hero{background:#ffe066;color:var(--k);border-radius:16px}
+.page .item{border-radius:12px}
+.page .item .im{background:#ffeaa6;border:2px solid var(--k)}
+.page .ph{background:repeating-linear-gradient(-45deg,#cfe0ff 0 12px,#bcd3ff 12px 24px);border-radius:12px}
+.page .lines i{background:#e8e2cc;height:12px}
+.page .art{background:#fff}
+.page .art .cat{color:#2f6bff}
+
+/* 入力・チェック */
+.page .inp{border:3px solid var(--k);border-radius:12px;background:#fff}
+.page .chk{border-bottom:2px dashed #d8d0b8}
+.page .chk input[type=checkbox],.page .mailchk input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;margin:1px 0 0;border:3px solid var(--k);border-radius:7px;background:#fff center/100% no-repeat;cursor:pointer}
+.page .chk input[type=checkbox]:checked,.page .mailchk input[type=checkbox]:checked{background-color:var(--chk,#ff3d8b);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.4 6.6 11.6 12.8 4.6' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.page .mailchk input[type=checkbox]{width:15px;height:15px;border-width:2px;border-radius:4px;margin:0}
+.page .shopui{--chk:#ff6a00}
+.page .opt input[type=radio]{appearance:none;-webkit-appearance:none;flex:none;width:22px;height:22px;margin:1px 0 0;border:3px solid var(--k);border-radius:50%;background:#fff;cursor:pointer;display:grid;place-items:center}
+.page .opt input[type=radio]::after{content:"";width:10px;height:10px;border-radius:50%;background:#8a3cff;transform:scale(0);transition:transform .12s}
+.page .opt input[type=radio]:checked::after{transform:scale(1)}
+.page .opt.plain input[type=radio]{border-color:#bbb}
+.page .opt.plain input[type=radio]:checked{border-color:var(--k)}
+.page .tg{border-bottom:2px dashed #d8d0b8}
+.page .tg input{border:3px solid var(--k);width:46px;height:26px;border-radius:14px;background:#ddd}
+.page .tg input::after{box-sizing:border-box;top:1px;left:1px;width:18px;height:18px;border:2px solid var(--k);box-shadow:none}
+.page .tg input:checked{background:#2f6bff}
+.page .tg input:checked::after{left:21px}
+
+/* 注文・商品 */
+.page .ord,.page .total{border-bottom:2px dashed #d8d0b8}
+.page .price b{color:#ff2e2e}
+.page .sale{background:#ff2e2e;border:3px solid var(--k);border-radius:12px;box-shadow:4px 4px 0 var(--k)}
+.page .stock{color:#ff2e2e}
+.page .pd-img{background:#ffeaa6;border-radius:16px}
+
+/* サブスク */
+.page .rows{border-radius:16px;overflow:hidden}
+.page .rows li{border-bottom:2px dashed #d8d0b8;font-weight:700}
+.page .pill{background:#ffd60a;color:var(--k);border:2px solid var(--k)}
+.page .foot{border-top:3px solid var(--k);background:#fff3c4}
+.page .opt.rec{border:3px solid #8a3cff;background:#f1e6ff;box-shadow:4px 4px 0 #8a3cff}
+.page .opt.plain{border:3px solid #ddd}
+
+.page .ord-list .ord{align-items:center}
+.page .ord-n{flex:1}
+.page .del{flex:none;background:none;border:0;padding:2px 0 2px 6px;font-size:10px;color:#b8b4be;text-decoration:underline;font-weight:500}
+.page .opt.mid{border:3px solid #cfc6ea;background:#fff}
+.page .opt.plain .opt-t{color:#a8a4b5}
+.page .chk.agree{border-bottom:0;font-size:12px;color:#5a5560;margin-top:14px;padding:6px 0}
+.page .btn.quit{margin-top:6px;background:#fff;color:#7a7680;border-color:#bbb;box-shadow:3px 3px 0 #bbb;font-size:13px;padding:10px}
+.page .btn.quit:not(:disabled){color:var(--k);border-color:var(--k);box-shadow:3px 3px 0 var(--k)}
+.page .btn.quit:disabled{opacity:.6;cursor:not-allowed}
+.page .crumb{font-size:11px;color:#8a8590;margin-bottom:6px}
+.page .promo{background:#fff;border:3px solid var(--k);border-radius:16px;box-shadow:5px 5px 0 var(--k);padding:16px;margin-bottom:18px}
+.page .promo-t{font-size:16px;font-weight:800;margin-bottom:4px}
+.page .promo .btn.big{margin-top:12px}
+.page .promo .btn.sub{display:block;width:100%;margin-top:10px}
+.page .other{padding:4px 2px}
+.page .other-h{font-size:12px;font-weight:800;color:#5a5560;margin-bottom:6px}
+.page .other a{display:block;font-size:13px;color:#2f6bff;text-decoration:underline;padding:5px 0}
+.page .ms-opts{display:grid;gap:10px;margin-top:14px}
+.page .ms-opt{display:block;width:100%;text-align:left;background:#fff;border:3px solid var(--k);border-radius:14px;box-shadow:4px 4px 0 var(--k);padding:12px 14px;cursor:pointer;font:inherit;color:var(--k)}
+.page .ms-opt:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--k)}
+.page .ms-opt b{display:block;font-size:15px;font-weight:800;line-height:1.45}
+.page .ms-opt span{display:block;font-size:11.5px;color:#6a6570;margin-top:3px;line-height:1.5}
+.page .ms-opt:hover{background:#fff7e6}
+.page .btn.pulse{animation:buyPulse .6s ease-in-out infinite}
+@keyframes buyPulse{50%{transform:scale(1.04);filter:brightness(1.1)}}
+.page .hype{position:absolute;inset:0;pointer-events:none;z-index:5}
+.page .hy{position:absolute;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:6px;background:#ffe14d;border:3px solid var(--k);border-radius:16px;box-shadow:5px 5px 0 var(--k);padding:10px 14px;animation:hyIn .35s cubic-bezier(.2,1.8,.4,1) both}
+.page .hy b{font-size:16px;font-weight:800;color:#d40000;white-space:nowrap}
+.page .hy button{font:inherit;font-size:13px;font-weight:800;background:#ff6a00;color:#fff;border:3px solid var(--k);border-radius:10px;padding:6px 14px;box-shadow:3px 3px 0 var(--k);cursor:pointer}
+.page .hy0{top:18%;left:6%;transform:rotate(-6deg)}
+.page .hy1{top:44%;right:6%;transform:rotate(5deg)}
+.page .hy2{top:68%;left:14%;transform:rotate(-3deg)}
+@keyframes hyIn{from{opacity:0;scale:.3}}
+@media (max-width:520px){.page .hy0{top:2%;left:3%}.page .hy1{top:2%;right:3%}.page .hy2{top:auto;bottom:2%;left:10%}.page .hy b{font-size:14px}}
+.page .sale.flash{animation:resetFlash .3s 3}
+@keyframes resetFlash{50%{background:#2ed15a}}
+/* 小さい文字は、小さいまま（ダークパターンの肝なので） */
+.page .del,.page .tiny-link,.page .shame,.page .fine,.page .cp-fine,.page .mailchk,.page .foot a.ghost,.page .x{font-weight:500}
+
+/* トースト */
+.toast{background:var(--k);border:3px solid #fff;border-radius:999px;font-weight:800}
+
+/* 切り抜きでは、画面端に接していた要素にも四辺の枠を付ける */
+.page.snap .cookie.news{border-bottom:3px solid var(--k);border-radius:18px}
+.page.snap .foot{border:3px solid var(--k);border-radius:14px}
+/* 切り抜き：影もそのまま見せる */
+.page.snap.isolate *{box-shadow:revert-layer}
+@media (max-width:520px){.frame .pd{gap:14px;padding:16px}.frame .pd-img{aspect-ratio:auto;height:96px;font-size:44px}}
+@media (max-width:520px) and (max-height:720px){.frame .pd-img{display:none}}
+@media (max-width:520px){
+  .frame .form-card.compact{margin:10px;padding:14px 14px 16px}
+  .frame .compact .pg-h{font-size:17px}
+  .frame .compact .opt{padding:10px 12px;margin-top:8px;gap:10px}
+  .frame .compact .opt-t{font-size:14px;margin-bottom:2px}
+  .frame .compact .opt-d{font-size:11.5px;line-height:1.5}
+  .frame .compact #fx{margin-top:12px}
+}
+@media (max-width:520px) and (max-height:720px){
+  .frame .compact .opt-d{display:none}
+  .frame .compact .opt.rec .opt-d{display:block}
+}
+@media (max-width:520px) and (max-height:720px){.frame #ms .muted{display:none}.frame .ms-opt span{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== Title ===== -->
+<section class="screen on burst" id="title">
+  <div class="dotsbg" style="position:absolute;inset:0;pointer-events:none"></div>
+  <div class="t-in">
+    <span class="t-tag">DARK PATTERN SPEED RUN</span>
+    <h1 class="t-logo dela"><span class="l1 outline">秒で見抜け！</span><span class="l2 outline">ダークパターン</span></h1>
+    <div class="demo" aria-hidden="true">
+      <div class="demo-card">
+        <p class="demo-q">🍪 Cookieの利用に同意しますか？</p>
+        <span class="demo-yes">同意する！</span>
+        <span class="demo-noRow"><span class="demo-no">同意しない</span></span>
+        <span class="demo-cursor"><svg viewBox="0 0 24 24" width="34" height="34"><path d="M4 2 L4 19 L8.5 14.5 L11.5 21 L14.5 19.6 L11.6 13.3 L18 13.3 Z" fill="#fff" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+      </div>
+
+    </div>
+    <p class="t-sub">命令は数秒。誘導に乗ったら、ドカン。</p>
+    <button class="pbtn" id="startBtn">スタート！</button>
+    <p class="t-note">※登場するサービスはすべて架空のものです</p>
+  </div>
+</section>
+
+<!-- ===== Game ===== -->
+<section class="screen dotsbg" id="game">
+  <div class="g-top">
+    <div class="lives" id="lives"></div>
+    <div class="score" id="score">SCORE 0</div>
+  </div>
+  <h2 class="cmd stroke" id="cmd"></h2>
+  <div class="frame-wrap">
+    <div class="frame" id="browser">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url" id="url"></span></div>
+      <div class="page" id="page"></div>
+      <div class="toasts" id="toasts"></div>
+    </div>
+  </div>
+  <div class="fuse" id="fuse"><div class="fuse-in"><span class="bomb">💣</span><div class="fuse-track"><div class="fuse-fill" id="fuseFill"></div></div></div></div>
+</section>
+
+<!-- ===== Result ===== -->
+<section class="screen burst" id="result"><div class="r-in" id="rIn"></div></section>
+
+<div class="over burst" id="over"></div>
+<div class="fx" id="fxl"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const page = $('#page');
+const yen = n => '¥' + n.toLocaleString('ja-JP');
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// s: クリア時の一言説明 / d: 結果画面の解説 / r: 現実でよく見る場所
+const PATTERNS = [
+  {name:'コンファームシェイミング', en:'Confirmshaming',
+   s:'断る選択肢に、損や後ろめたさを感じる言い方を使い、「いいえ」を選びにくくする設計。',
+   d:'選択肢の見た目は同じでも、止める側だけ「損をしてもかまわないので、すべて停止する」と、損を認めさせる言い方にする。「週1回だけ」という中途半端な選択肢も並べて、止める以外の道へ誘う。',
+   r:'メルマガの配信停止ページ、クーポンのポップアップ、アプリへの誘導バナー'},
+  {name:'インターフェース干渉', en:'Interface Interference',
+   s:'同意は目立つボタンで1クリック、拒否は小さなリンクの先。選択肢の見せ方に差をつけて、一方へ誘導する設計。',
+   d:'「同意」は大きく目立つボタンにし、「設定」は小さなリンクの奥に置く。設定画面を開いても項目は最初からオンで、自分で一つずつオフにしなければならない。どちらも選べるように見えて、手間には大きな差がある。',
+   r:'Cookieバナー、アプリの通知許可、位置情報の許可ダイアログ'},
+  {name:'こっそり追加', en:'Sneak into Basket',
+   s:'頼んでいない有料オプションや購読を、最初から注文に入れておき、気づかないまま申し込ませる設計。',
+   d:'保証やサポートを、商品と同じ形の行として最初から注文内容に入れておく。外すには小さな「削除」を押す必要がある。メルマガの購読欄は、注文ボタンの下の目に入りにくい場所に置く。',
+   r:'ECサイトの注文確認画面、ソフトのインストール時のおまけ'},
+  {name:'偽りの緊急性', en:'False Urgency',
+   s:'根拠のない残り時間や在庫表示で焦らせ、比べたり考えたりする前に決めさせる設計。',
+   d:'カウントダウン、「残り1点」、増えていく閲覧人数で焦らせ、目の前の「今すぐ購入」を押させる。でもタイマーは0になると、何事もなかったように元の時間に戻る。期限は、あなたを動かすためだけにあった。',
+   r:'ECサイトのタイムセール表示、予約サイトの「残り1室」'},
+  {name:'ミスディレクション', en:'Misdirection',
+   s:'目的とは別の選択肢を「おすすめ」として選んでおき、そちらへ誘導する設計。',
+   d:'解約ページで「一時停止」を目立たせ、最初から選択済みにしておく。解約を選んでも、大きな「1ヶ月無料で継続する」ボタンと、注意事項に同意しないと押せない解約ボタンで、もう一度引き止める。',
+   r:'解約画面の「一時停止」「ダウングレード」への誘導'},
+];
+
+// クリア時に、さっきの画面から切り抜いて見せる範囲
+const MARKS = [
+  ['.form-card'],
+  ['#ck'],
+  ['.ord-list', '.total', '#od', '.mailchk'],
+  ['.price', '#ug', '.stock', '#buy'],
+  ['.opt'],
+];
+
+
+
+// 各プチゲーム：命令・補足・基本の制限時間（秒）
+const GAMES = [
+  {cmd:'メルマガを<wbr>止めろ！', sub:'メールの配信を、すべて停止しよう', t:7, run:s2},
+  {cmd:'拒否して<wbr>閉じろ！', sub:'Cookieは必要なものだけ', t:10, run:s1},
+  {cmd:'本体だけ買え！', sub:'イヤホン以外は、何もいらない', t:9, run:s4},
+  {cmd:'押すな！', sub:'セールが終わるまで、何も押さずに見届けよう', t:8, run:s5},
+  {cmd:'解約しろ！', sub:'動画サブスクを、今度こそ', t:10, run:s7},
+];
+const MAX_LIVES = 3;
+// 後半ほど制限時間が短くなる（1問目100% → 7問目およそ60%）
+const speedAt = r => 1 - r * 0.09;
+
+const st = {lives:MAX_LIVES, score:0, round:0, cur:-1, busy:true, timer:null, hurry:null, cd:null,
+            snaps:[], first:[], reloading:false};
+
+/* ---------- helpers ---------- */
+function setUrl(u){ $('#url').textContent = 'https://' + u; }
+function toast(msg){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+function show(id){ document.querySelectorAll('.screen').forEach(e => e.classList.toggle('on', e.id === id)); window.scrollTo(0,0); }
+function heartsHTML(popIndex){
+  return Array.from({length:MAX_LIVES}, (_,k) => `<span class="hrt ${k < st.lives ? '' : 'lost'} ${k === popIndex ? 'pop' : ''}">♥</span>`).join('');
+}
+function hud(){ $('#lives').innerHTML = heartsHTML(); $('#score').textContent = 'SCORE ' + st.score; }
+
+/* ---------- 導火線 ---------- */
+function startFuse(ms){
+  const f = $('#fuseFill'), fz = $('#fuse');
+  fz.classList.remove('hurry','paused');
+  f.style.transition = 'none'; f.style.width = '100%'; void f.offsetWidth;
+  f.style.transition = `width ${ms}ms linear`; f.style.width = '0%';
+  clearTimeout(st.timer); clearTimeout(st.hurry);
+  st.timer = setTimeout(() => fail('時間切れ！'), ms);
+  st.hurry = setTimeout(() => fz.classList.add('hurry'), ms * .7);
+}
+function stopFuse(){
+  clearTimeout(st.timer); clearTimeout(st.hurry);
+  clearInterval(st.cd); st.cd = null;
+  (st.later || []).forEach(clearTimeout); st.later = [];
+  const f = $('#fuseFill'), w = getComputedStyle(f).width;
+  f.style.transition = 'none'; f.style.width = w;
+  $('#fuse').classList.add('paused'); $('#fuse').classList.remove('hurry');
+}
+
+/* ---------- flow ---------- */
+$('#startBtn').onclick = () => { show('game'); hud(); nextGame(); };
+
+async function nextGame(){
+  if(st.lives <= 0) return finish(false);
+  if(st.round >= GAMES.length) return finish(true);
+  const gi = st.round, sp = speedAt(st.round);
+  const ov = $('#over');
+
+  if(st.round === 2 || st.round === GAMES.length - 1){
+    const last = st.round === GAMES.length - 1;
+    ov.className = 'over burst on speed';
+    ov.innerHTML = `<p class="big outline">${last ? 'LAST!!' : 'SPEED UP!!'}</p><p class="cmd-sub">${last ? 'ラスト1問！' : 'ここから制限時間が短くなります'}</p>`;
+    await wait(1300);
+  }
+  ov.className = 'over burst on inter' + (st.round % 2 ? ' alt' : '');
+  ov.innerHTML = `<p class="lbl">ROUND ${st.round + 1} / ${GAMES.length}</p><p class="num outline">${st.round + 1}</p><div class="lives">${heartsHTML()}</div>`;
+  await wait(Math.max(700, 1000 * sp));
+  ov.className = 'over burst on cmdflash';
+  ov.innerHTML = `<p class="cmd-big stroke">${GAMES[gi].cmd}</p><p class="cmd-sub">${GAMES[gi].sub}</p>`;
+  await wait(Math.max(800, 1100 * sp));
+  ov.className = 'over burst';
+  play(gi, sp);
+}
+
+function play(gi, sp){
+  st.cur = gi; st.busy = false; st.reloading = false;
+  const c = $('#cmd'); c.innerHTML = GAMES[gi].cmd; c.classList.remove('in'); void c.offsetWidth; c.classList.add('in');
+  window.scrollTo(0,0);
+  st.fuseMs = GAMES[gi].t * sp * 1000;
+  GAMES[gi].run();
+  if(!st.snaps[gi]) st.snaps[gi] = {html: page.innerHTML, W: Math.min(page.clientWidth, 420)};
+  startFuse(GAMES[gi].t * sp * 1000);
+}
+
+function record(ok, msg){
+  if(st.first[st.cur] === undefined) st.first[st.cur] = {ok, msg};
+}
+
+async function clearStage(){
+  if(st.busy) return; st.busy = true;
+  stopFuse(); st.score++; record(true); hud();
+  const fx = $('#fxl'); fx.className = 'fx good on'; fx.innerHTML = `<div class="okstamp">クリア！</div>`;
+  await wait(850);
+  fx.className = 'fx'; fx.innerHTML = '';
+  st.round++; nextGame();
+}
+
+async function fail(msg){
+  if(st.busy) return; st.busy = true;
+  stopFuse(); record(false, msg);
+  st.lives--;
+  $('#lives').innerHTML = heartsHTML(st.lives);
+  const fr = $('#browser'); fr.classList.remove('hit'); void fr.offsetWidth; fr.classList.add('hit');
+  const fx = $('#fxl');
+  fx.className = 'fx bad on';
+  fx.innerHTML = `<div class="boom"><div class="boom-in"><span>ドカン！</span></div></div><p class="boom-msg">${msg}</p>`;
+  await wait(1700);
+  fx.className = 'fx'; fx.innerHTML = '';
+  st.round++; nextGame();
+}
+// ステージ内で誘導に乗ったとき（理由は結果画面で解説するので、ここでは起きたことだけ見せる）
+function trap(msg){ fail(msg); }
+
+
+// ステージ i の「仕掛け部分の切り抜き」を view の中に描く（クリア時と結果画面で共用）
+function renderCrop(i, view, maxH, uniform){
+  const {html, W} = st.snaps[i];
+  // 開始時の画面を、同じ幅で画面外に組み立てて位置を測る
+  const snap = document.createElement('div');
+  snap.className = 'page snap';
+  snap.innerHTML = html;
+  snap.style.cssText = `position:absolute;left:-99999px;top:0;width:${W}px;visibility:hidden`;
+  document.body.appendChild(snap);
+  const base = snap.getBoundingClientRect(), H = snap.offsetHeight;
+  // 仕掛けのある部分だけを残し、それ以外（背景・暗幕・周りの要素）は非表示にする
+  const kept = (MARKS[i] || []).flatMap(sel => [...snap.querySelectorAll(sel)]);
+  kept.forEach(el => el.classList.add('keep'));
+  snap.classList.add('isolate');
+  const marks = kept.map(el => {
+    const r = el.getBoundingClientRect();
+    return {x:r.left-base.left, y:r.top-base.top, w:r.width, h:r.height};
+  });
+  snap.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+  // 残した部分の範囲に、白地の余白を付けて切り抜く
+  const PAD = 18;
+  // uniform のときは横幅を画面いっぱいにそろえ、縦だけ切り抜く
+  const x0 = uniform ? -PAD : Math.min(...marks.map(m=>m.x)) - PAD, y0 = Math.min(...marks.map(m=>m.y)) - PAD;
+  const x1 = uniform ? W + PAD : Math.max(...marks.map(m=>m.x+m.w)) + PAD, y1 = Math.max(...marks.map(m=>m.y+m.h)) + PAD;
+  const cw = x1 - x0, ch = y1 - y0;
+  const cs = getComputedStyle(view);
+  const avail = view.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  // uniform：どの画面も同じ倍率（元の画面幅＋余白がちょうど収まる倍率）で表示する
+  const s = uniform ? avail / (W + PAD*2) : Math.min(avail / cw, maxH / ch, 1.4);
+  const crop = document.createElement('div');
+  crop.className = 'crop';
+  crop.style.cssText = `width:${cw*s}px;height:${ch*s}px`;
+  snap.style.cssText = `width:${W}px;height:${H}px;transform:scale(${s}) translate(${-x0}px,${-y0}px)`;
+  crop.appendChild(snap);
+  view.appendChild(crop);
+}
+
+
+
+/* ---------- shared bits ---------- */
+function newsNav(){ return `<div class="nav"><span class="logo news">まいにちニュース</span><span class="me">ログイン</span></div>`; }
+function shopNav(){ return `<div class="nav"><span class="logo shop">いろはマーケット</span><span class="search"></span><span class="me">🛒 カート</span></div>`; }
+function subNav(){ return `<div class="nav"><span class="logo">ずっとプラス</span><span class="me">プレミアム会員 さま</span></div>`; }
+
+/* ---------- STAGE 1: Cookieバナー（ニュースサイト） ---------- */
+function s1(){
+  setUrl('mainichi-news.example/articles/1103');
+  page.innerHTML = newsNav() + `
+    <article class="art">
+      <p class="cat">くらし</p>
+      <h2 class="art-h">週末は全国的に晴れ、紅葉狩りに絶好の行楽日和に</h2>
+      <p class="art-meta">2026年11月3日 9:00</p>
+      <div class="ph"></div>
+      <div class="lines">${'<i></i>'.repeat(4)}</div>
+    </article>
+    <div class="cookie news" id="ck">
+      <p class="ck-d">当サイトでは、サービスの改善や広告配信のためにCookieを利用しています。「同意して閉じる」を押すと、Cookieの利用に同意したものとみなします。</p>
+      <button class="btn primary block" id="ckAll">同意して閉じる</button>
+      <button class="tiny-link" id="ckSet">設定を変更する</button>
+    </div>`;
+  $('#ckAll').onclick = () => trap('すべてのCookieの利用に同意しました。',
+    '目立つボタンは「同意」だけでした。拒否や設定の変更は、小さなリンクの先にありました。');
+  $('#ckSet').onclick = () => {
+    $('#ck').innerHTML = `
+      <p class="ck-t">Cookieの設定</p>
+      <label class="tg"><span>必須<small>サイトの表示や動作に必要です</small></span><input type="checkbox" checked disabled></label>
+      <label class="tg"><span>アクセス解析<small>閲覧状況を分析し、サイトを改善します</small></span><input type="checkbox" data-opt checked></label>
+      <label class="tg"><span>広告配信<small>興味に合わせた広告を表示します</small></span><input type="checkbox" data-opt checked></label>
+      <label class="tg"><span>パートナー企業との共有<small>提携企業と閲覧データを共有します</small></span><input type="checkbox" data-opt checked></label>
+      <div class="ck-actions">
+        <button class="btn primary block" id="ckAll2">すべて許可する</button>
+        <button class="tiny-link" id="ckSave">選択した内容で保存</button>
+      </div>`;
+    $('#ckAll2').onclick = () => trap('すべてのCookieの利用を許可しました。',
+      '設定画面でも、目立つのは「すべて許可する」のボタンでした。');
+    $('#ckSave').onclick = () => {
+      const on = page.querySelectorAll('[data-opt]:checked').length;
+      if(on) return trap(`必須以外のCookie ${on}項目の利用に同意しました。`);
+      clearStage();
+    };
+  };
+}
+
+/* ---------- STAGE 2: クーポンのポップアップ（EC） ---------- */
+function shopHome(){
+  const items = [['🎧','ワイヤレスイヤホン','¥4,980'],['⌚','スマートウォッチ','¥12,800'],['🔋','モバイルバッテリー','¥2,980'],
+                 ['🖱️','静音マウス','¥1,980'],['💡','デスクライト','¥3,480'],['🎒','通勤リュック','¥6,900']];
+  return `<div class="hero">秋の新生活フェア　最大30%OFF</div><div class="items">` +
+    items.map(([e,n,p])=>`<div class="item"><div class="im">${e}</div>${n}<b>${p}</b></div>`).join('') + `</div>`;
+}
+function s2(){
+  setUrl('iroha-market.example/mail/unsubscribe');
+  const opts = shuffle3([
+    {v:'keep', t:'お得な情報を受け取り続ける', d:'会員限定セールの先行案内や、毎月の10%OFFクーポンが届きます'},
+    {v:'less', t:'週1回だけ受け取る', d:'特典はそのままに、届く回数を減らせます'},
+    {v:'stop', t:'損をしてもかまわないので、すべて停止する', d:'会員限定の特典は、今後すべて受け取れなくなります'},
+  ]);
+  page.innerHTML = `<div class="shopui">${shopNav()}<div class="form-card" id="ms">
+      <h2 class="pg-h">メール配信の設定</h2>
+      <p class="muted">taro@example.com 宛てのメールマガジンについて、ご希望を選んでください。</p>
+      <div class="ms-opts">${opts.map(o=>`<button class="ms-opt" data-v="${o.v}"><b>${o.t}</b><span>${o.d}</span></button>`).join('')}</div>
+    </div></div>`;
+  const pick = v => {
+    if(v === 'keep') return trap('メールマガジンの配信を継続します。');
+    if(v === 'less') return trap('配信を週1回に変更しました。メールは引き続き届きます。');
+    clearStage();
+  };
+  page.querySelectorAll('.ms-opt').forEach(x => x.onclick = () => pick(x.dataset.v));
+}
+// 3択の並び順は毎回入れ替える（位置で覚えられないように）
+function shuffle3(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- STAGE 4: 注文確認（有料オプション・メルマガ） ---------- */
+function s4(){
+  setUrl('iroha-market.example/checkout');
+  page.innerHTML = `<div class="shopui">${shopNav()}<div class="form-card">
+      <h2 class="pg-h">ご注文内容の確認</h2>
+      <div class="ord-list">
+        <div class="ord"><span class="ord-n">ワイヤレスイヤホン BX-200</span><span class="p">¥4,980</span></div>
+        <div class="ord" data-price="880"><span class="ord-n">あんしん延長保証（2年）</span><span class="p">¥880</span><button class="del">削除</button></div>
+        <div class="ord" data-price="1100"><span class="ord-n">はじめての設定サポート</span><span class="p">¥1,100</span><button class="del">削除</button></div>
+      </div>
+      <div class="total"><span>お支払い合計</span><b id="tot"></b></div>
+      <button class="btn primary big block" id="od">注文を確定する</button>
+      <label class="mailchk"><input type="checkbox" checked id="mail">いろはマーケットからのメールマガジンを購読する</label>
+    </div></div>`;
+  const paid = () => [...page.querySelectorAll('.ord[data-price]')];
+  const total = () => 4980 + paid().reduce((a,r)=>a + +r.dataset.price, 0);
+  const upd = () => $('#tot').textContent = yen(total());
+  page.querySelectorAll('.del').forEach(btn => btn.onclick = () => { btn.closest('.ord').remove(); upd(); });
+  upd();
+  $('#od').onclick = () => {
+    const extra = paid().length > 0, mail = $('#mail').checked;
+    if(!extra && !mail) return clearStage();
+    const msg = (extra ? `合計 ${yen(total())} で注文を受け付けました。` : '注文を受け付けました。') + (mail ? 'メールマガジンの購読も開始しました。' : '');
+    trap(msg);
+  };
+}
+
+/* ---------- STAGE 5: タイムセール（偽りの緊急性） ---------- */
+function s5(){
+  setUrl('iroha-market.example/items/bx-200');
+  page.innerHTML = `<div class="shopui">${shopNav()}<div class="pd">
+      <div class="pd-img">🎧</div>
+      <div>
+        <p class="pd-name">ワイヤレスイヤホン BX-200</p>
+        <p class="rate">★★★★☆ <span>（128件）</span></p>
+        <p class="price"><s>¥5,980</s><b>¥4,980</b></p>
+        <div class="sale" id="ug">⏰ タイムセール終了まで<b id="cd">00:00:05</b></div>
+        <p class="stock">残りわずか！在庫<span id="stk">3</span>点 ・ いま<span id="view">24</span>人がこの商品を見ています</p>
+        <button class="btn primary big block pulse" id="buy">今すぐ購入する</button>
+        <button class="btn sub" id="cart">カートに入れる</button>
+      </div>
+    </div><div class="hype" id="hype"></div></div>`;
+  const buy = () => trap('タイムセール価格で注文しました。…でもこのセール、本当に終わるのでしょうか？');
+  $('#buy').onclick = buy;
+  $('#cart').onclick = () => trap('カートに追加しました。「今だけ」に急かされて、手が動いてしまいました。');
+  // セールの残り時間：導火線より先に0になる
+  const total = Math.max(2600, st.fuseMs * 0.62), start = Date.now();
+  let stock = 3, view = 24;
+  clearInterval(st.cd);
+  st.cd = setInterval(() => {
+    const left = Math.max(0, total - (Date.now() - start)), sec = Math.ceil(left / 1000 * 5 / (total/1000));
+    const el = $('#cd'); if(el) el.textContent = '00:00:0' + Math.min(5, sec);
+    view += Math.random() < .5 ? 1 + Math.floor(Math.random()*3) : 0;
+    const v = $('#view'); if(v) v.textContent = view;
+    if(left <= 0){
+      clearInterval(st.cd); st.cd = null;
+      // 0になった瞬間、何事もなかったように元に戻る
+      if(el) el.textContent = '00:15:00';
+      const ug = $('#ug'); if(ug) ug.classList.add('flash');
+      $('#hype').innerHTML = '';
+      st.later.push(setTimeout(clearStage, 900));
+    }
+  }, 120);
+  // 煽りが次々と飛び出す
+  const hypes = [['あと3秒！','今すぐ購入'],['残り1点！','購入する'],['今すぐ購入でポイント5倍！','ポイントGET']];
+  st.later = [];
+  hypes.forEach((h, k) => st.later.push(setTimeout(() => {
+    if(st.cur !== 3 || st.busy) return;
+    if(k === 1){ const sk = $('#stk'); if(sk) sk.textContent = '1'; }
+    const d = document.createElement('div');
+    d.className = 'hy hy' + k;
+    d.innerHTML = `<b>${h[0]}</b><button>${h[1]}</button>`;
+    d.querySelector('button').onclick = buy;
+    $('#hype').appendChild(d);
+  }, total * (0.18 + k * 0.24))));
+}
+
+/* ---------- STAGE 7: 解約の最終確認（ミスディレクション） ---------- */
+function s7(){
+  setUrl('zuttoplus.example/account/cancel');
+  page.innerHTML = subNav() + `<div class="form-card compact" id="fc7">
+      <h2 class="pg-h">プランの変更・解約</h2>
+      <p class="muted">ご希望の手続きを選んでください。</p>
+      <label class="opt rec"><input type="radio" name="fin" value="pause" checked>
+        <div><p class="opt-t">一時停止する <span class="pill">おすすめ</span></p>
+        <p class="opt-d">視聴履歴やお気に入りを残したまま、最大3ヶ月お休みできます。</p>
+        <p class="fine">※休止期間の終了後は、自動で再開されます</p></div></label>
+      <label class="opt plain"><input type="radio" name="fin" value="cancel">
+        <div><p class="opt-t">解約する</p>
+        <p class="opt-d">次回更新日をもって、すべての機能がご利用いただけなくなります。</p></div></label>
+      <button class="btn primary big block" id="fx">この内容で手続きする</button>
+    </div>`;
+  $('#fx').onclick = () => {
+    const v = page.querySelector('[name=fin]:checked').value;
+    if(v === 'pause') return trap('一時停止を受け付けました。3ヶ月後に自動で再開されます。');
+    // 最終確認：もう一度引き止め、解約ボタンは同意しないと押せない
+    $('#fc7').innerHTML = `
+      <h2 class="pg-h">本当に解約しますか？</h2>
+      <p class="muted">解約すると、次回更新日までの残り23日分も含めて、視聴履歴・お気に入り・ポイントがすべて失われます。</p>
+      <button class="btn primary big block" id="keep">1ヶ月無料で継続する</button>
+      <label class="chk agree"><input type="checkbox" id="agree">解約に関する注意事項を確認しました</label>
+      <button class="btn quit block" id="quit" disabled>解約を完了する</button>`;
+    $('#keep').onclick = () => trap('1ヶ月無料で継続しました。翌月からは月額1,980円です。');
+    $('#agree').onchange = e => { $('#quit').disabled = !e.target.checked; };
+    $('#quit').onclick = clearStage;
+  };
+}
+
+/* ---------- RESULT ---------- */
+function finish(allClear){
+  stopFuse();
+  const total = GAMES.length;
+  const rank =
+    st.score >= total ? 'ダークパターン鑑定士' :
+    st.score >= 4     ? '誘導を見抜くプロ' :
+    st.score >= 2     ? '用心深いユーザー' :
+                        'サービスにとって理想のユーザー';
+  const text = `秒で見抜け！ダークパターン で ${st.score}/${total}問クリア（${rank}）`;
+  const share = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text + ' ' + location.href);
+  $('#rIn').innerHTML = `
+    <div class="r-head">
+      <p class="r-title dela outline ${allClear ? '' : 'over-t'}">${!allClear ? 'GAME OVER' : (st.score === total ? 'ALL CLEAR!!' : 'FINISH!')}</p>
+      <div class="r-score"><span>クリア数</span><b>${st.score}</b><span>/ ${total}</span></div>
+      <p class="r-rank">称号：<b>${rank}</b></p>
+    </div>
+    <h2 class="r-h">今回の${PATTERNS.length}つのダークパターン</h2>
+    <div class="cards">
+    ${PATTERNS.map((p,i) => {
+      const f = st.first[i];
+      const res = f ? (f.ok ? '<span class="c-res ok">見抜いた！</span>' : '<span class="c-res ng">ドカン…</span>') : '<span class="c-res na">未プレイ</span>';
+      return `<div class="card">
+        <div><div class="c-top"><span class="c-no">${String(i+1).padStart(2,'0')}</span>${res}</div>
+          <p class="c-name">${p.name}</p><p class="c-en">${p.en}</p><p class="c-d">${p.d}</p><p class="c-r">よく見る場所：${p.r}</p></div>
+        ${st.snaps[i] ? `<div class="spec-view" data-i="${i}"></div>` : ''}
+      </div>`; }).join('')}
+    </div>
+    <div class="r-closing">ダークパターンとは、ユーザー自身の意思ではなく、事業側の都合で選択を決めさせるUIのこと。焦っているときほど、目立つボタンを反射的に押してしまいます。<br><br>次に何かに申し込むとき、ひと呼吸おいて、今回のダークパターンを思い出してもらえたらうれしいです。</div>
+    <div class="r-acts">
+      <button class="pbtn" onclick="location.reload()">もう一回！</button>
+      <a class="pbtn white" href="${share}" target="_blank" rel="noopener">結果をシェア</a>
+    </div>
+    <p class="r-note">※登場するサービスはすべて架空のものです</p>`;
+  show('result');
+  $('#rIn').querySelectorAll('.spec-view').forEach(v => { if(st.snaps[v.dataset.i]) renderCrop(+v.dataset.i, v, Infinity, true); });
+}
+</script>
+</body>
+</html>
